@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace MusicAPI.Models
 {
@@ -16,11 +17,12 @@ namespace MusicAPI.Models
         [Display(Name = "Utgivningsdatum")]
         public DateOnly ReleaseYear { get; set; }
 
-        public int? ArtistId { get; set; }
+        public int ArtistId { get; set; }
 
-        [Required]
-        public required Artist Artist { get; set; }
+        [JsonIgnore]
+        public Artist? Artist { get; set; }
 
+        [JsonIgnore]
         public List<Song>? Song { get; set; }
 
     }

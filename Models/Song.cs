@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
 namespace MusicAPI.Models
 {
 
@@ -14,10 +16,10 @@ namespace MusicAPI.Models
 
         public string? Category { get; set; }
 
-        public int? ArtistId { get; set; }
-
         [Required]
-        public required Artist Artist { get; set; }
+        public required int? ArtistId { get; set; }
+
+        public Artist? Artist { get; set; }
 
         public int? AlbumId { get; set; }
         
