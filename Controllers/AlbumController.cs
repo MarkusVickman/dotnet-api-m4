@@ -25,14 +25,27 @@ namespace MusicAPI.Controller
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Album>>> GetAlbums()
         {
-            return await _context.Albums.ToListAsync();
+            var albums = await _context.Albums
+                .Include(a => a.Artist)
+                .Include(a => a.Song)
+                .ToListAsync();
+
+            if (albums == null)
+            {
+                return NotFound();
+            }
+
+            return albums;
         }
 
         // GET: api/Album/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Album>> GetAlbum(int id)
         {
-            var album = await _context.Albums.FindAsync(id);
+            var album = await _context.Albums
+                .Include(a => a.Artist)
+                .Include(a => a.Song)
+                .FirstOrDefaultAsync(a => a.AlbumId == id);
 
             if (album == null)
             {
@@ -76,23 +89,29 @@ namespace MusicAPI.Controller
         // POST: api/Album
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Album>> PostAlbum(Album album)
+        public async Task<ActionResult<Album>> PostAlbum(AlbumDto albumDto)
         {
 
 
-            var artist = await _context.Artists.FindAsync(album.ArtistId);
+            var artist = await _context.Artists.FindAsync(albumDto.ArtistId);
             if (artist == null)
             {
-                return NotFound($"Artist with ID {album.ArtistId} not found.");
+                return NotFound($"Artist with ID {albumDto.ArtistId} not found.");
             }
 
-            album.Artist = artist;
+            var newEntry = new Album
+            {
+                AlbumName = albumDto.AlbumName,
+                ReleaseYear = albumDto.ReleaseYear,
+                Artist = artist,
+                ArtistId = albumDto.ArtistId
+            };
 
 
-            _context.Albums.Add(album);
+            _context.Albums.Add(newEntry);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAlbum", new { id = album.AlbumId }, album);
+            return CreatedAtAction("GetAlbum", new { id = newEntry.AlbumId }, newEntry);
         }
 
         // DELETE: api/Album/5

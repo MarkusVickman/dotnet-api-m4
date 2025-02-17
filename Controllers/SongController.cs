@@ -25,7 +25,17 @@ namespace MusicAPI.Controller
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Song>>> GetSongs()
         {
-            return await _context.Songs.ToListAsync();
+            var songs = await _context.Songs
+                          .Include(a => a.Artist)
+                          .Include(a => a.Album)
+                          .ToListAsync();
+
+            if (songs == null)
+            {
+                return NotFound();
+            }
+
+            return songs;
         }
 
         // GET: api/Song/5
@@ -76,32 +86,34 @@ namespace MusicAPI.Controller
         // POST: api/Song
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Song>> PostSong(Song song)
+        public async Task<ActionResult<Song>> PostSong(SongDto songDto)
         {
 
 
 
-            var artist = await _context.Artists.FindAsync(song.ArtistId);
+            var artist = await _context.Artists.FindAsync(songDto.ArtistId);
             if (artist == null)
             {
-                return NotFound($"Artist with ID {song.ArtistId} not found.");
+                return NotFound($"Artist with ID {songDto.ArtistId} not found.");
             }
 
-            var album = await _context.Albums.FindAsync(song.AlbumId);
+            var album = await _context.Albums.FindAsync(songDto.AlbumId);
 
-            song.Artist = artist;
-            song.Album = album;
+            var newEntry = new Song
+            {
+                Title = songDto.Title,
+                AlbumId = songDto.AlbumId,
+                Artist = artist,
+                ArtistId = songDto.ArtistId,
+                Length = songDto.Length,
+                Category = songDto.Category,
 
+            };
 
-            song.Artist = artist;
-
-
-
-
-            _context.Songs.Add(song);
+            _context.Songs.Add(newEntry);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetSong", new { id = song.SongId }, song);
+            return CreatedAtAction("GetSong", new { id = newEntry.SongId }, newEntry);
         }
 
         // DELETE: api/Song/5

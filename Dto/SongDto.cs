@@ -1,14 +1,9 @@
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
-
 namespace MusicAPI.Models
 {
 
-    public class Song
+    public class SongDto
     {
-
-        public int SongId { get; set; }
-
         [Required]
         public required string Title { get; set; }
 
@@ -18,12 +13,8 @@ namespace MusicAPI.Models
 
         [Required]
         public required int? ArtistId { get; set; }
-        
-        public Artist? Artist { get; set; }
 
         public int? AlbumId { get; set; }
 
-        [JsonIgnore]
-        public Album? Album { get; set; }
     }
 }
