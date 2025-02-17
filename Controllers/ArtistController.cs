@@ -94,6 +94,17 @@ namespace MusicAPI.Controller
                 return NotFound();
             }
 
+
+            var albums = await _context.Albums.Where(a => a.ArtistId == id).ToListAsync();
+            var songs = await _context.Songs.Where(s => s.ArtistId == id).ToListAsync();
+
+            if (albums.Count > 0 || songs.Count > 0)
+            {
+                return BadRequest("Cannot delete artist because there are related albums or songs.");
+            }
+
+
+
             _context.Artists.Remove(artist);
             await _context.SaveChangesAsync();
 

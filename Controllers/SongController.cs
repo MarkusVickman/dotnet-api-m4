@@ -42,7 +42,11 @@ namespace MusicAPI.Controller
         [HttpGet("{id}")]
         public async Task<ActionResult<Song>> GetSong(int id)
         {
-            var song = await _context.Songs.FindAsync(id);
+
+            var song = await _context.Songs
+                .Include(a => a.Artist)
+                .Include(a => a.Album)
+                .FirstOrDefaultAsync(a => a.SongId == id);
 
             if (song == null)
             {
@@ -55,14 +59,63 @@ namespace MusicAPI.Controller
         // PUT: api/Song/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutSong(int id, Song song)
+        public async Task<IActionResult> PutSong(int id, SongPutDto songPutDto)
         {
-            if (id != song.SongId)
+            if (id != songPutDto.SongId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(song).State = EntityState.Modified;
+            var song = await _context.Songs.FindAsync(id);
+            if (song == null)
+            {
+                return NotFound();
+            }
+
+            if (songPutDto.AlbumId != 0)
+            {
+                // Uppdatera endast fält som skickas med i begäran
+                if (songPutDto.AlbumId != 0)
+                {
+                    var album = await _context.Albums.FindAsync(songPutDto.AlbumId);
+                    if (album == null)
+                    {
+                        return NotFound($"Album with ID {songPutDto.AlbumId} not found.");
+                    }
+
+                    song.AlbumId = songPutDto.AlbumId;
+                }
+            }
+
+            if (songPutDto.ArtistId != 0)
+            {
+                if (songPutDto.ArtistId != 0)
+                {
+                    var artist = await _context.Artists.FindAsync(songPutDto.ArtistId);
+                    if (artist == null)
+                    {
+                        return NotFound($"Album with ID {songPutDto.ArtistId} not found.");
+                    }
+
+                    song.ArtistId = songPutDto.ArtistId;
+                }
+            }
+
+            // Uppdatera endast fält som skickas med i begäran
+            if (!string.IsNullOrEmpty(songPutDto.Title))
+            {
+                song.Title = songPutDto.Title;
+            }
+
+            if (songPutDto.Length.HasValue)
+            {
+                song.Length = songPutDto.Length.Value;
+            }
+
+            if (!string.IsNullOrEmpty(songPutDto.Category))
+            {
+                song.Category = songPutDto.Category;
+            }
 
             try
             {

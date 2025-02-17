@@ -58,14 +58,48 @@ namespace MusicAPI.Controller
         // PUT: api/Album/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAlbum(int id, Album album)
+        public async Task<IActionResult> PutAlbum(int id, AlbumPutDto albumPutDto)
         {
-            if (id != album.AlbumId)
+            if (id != albumPutDto.AlbumId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(album).State = EntityState.Modified;
+
+
+            var album = await _context.Albums.FindAsync(id);
+            if (album == null)
+            {
+                return NotFound();
+            }
+
+
+            if (albumPutDto.ArtistId != 0)
+            {
+                if (albumPutDto.ArtistId != 0)
+                {
+                    var artist = await _context.Artists.FindAsync(albumPutDto.ArtistId);
+                    if (artist == null)
+                    {
+                        return NotFound($"Album with ID {albumPutDto.ArtistId} not found.");
+                    }
+
+                    album.ArtistId = albumPutDto.ArtistId;
+                }
+            }
+
+            // Uppdatera endast fält som skickas med i begäran
+            if (!string.IsNullOrEmpty(albumPutDto.AlbumName))
+            {
+                album.AlbumName = albumPutDto.AlbumName;
+            }
+
+            if (albumPutDto.ReleaseYear != default)
+            {
+                album.ReleaseYear = albumPutDto.ReleaseYear;
+            }
+
+
 
             try
             {
