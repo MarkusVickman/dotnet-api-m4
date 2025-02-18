@@ -25,6 +25,7 @@ namespace MusicAPI.Controller
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Album>>> GetAlbums()
         {
+            //Inkluderar artister och songer som har fk i album
             var albums = await _context.Albums
                 .Include(a => a.Artist)
                 .Include(a => a.Song)
@@ -42,6 +43,7 @@ namespace MusicAPI.Controller
         [HttpGet("{id}")]
         public async Task<ActionResult<Album>> GetAlbum(int id)
         {
+            //Inkluderar artister och songer som har fk i album
             var album = await _context.Albums
                 .Include(a => a.Artist)
                 .Include(a => a.Song)
@@ -65,15 +67,13 @@ namespace MusicAPI.Controller
                 return BadRequest();
             }
 
-
-
             var album = await _context.Albums.FindAsync(id);
             if (album == null)
             {
                 return NotFound();
             }
 
-
+            //Flera if-satser som gör att bara om fälten är ifyllda så uppdateras värdet i databasen
             if (albumPutDto.ArtistId != 0)
             {
                 if (albumPutDto.ArtistId != 0)
@@ -99,8 +99,7 @@ namespace MusicAPI.Controller
                 album.ReleaseYear = albumPutDto.ReleaseYear;
             }
 
-
-
+            // Kontrollerar om fel uppstår vid sparande till databasen
             try
             {
                 await _context.SaveChangesAsync();
@@ -126,13 +125,14 @@ namespace MusicAPI.Controller
         public async Task<ActionResult<Album>> PostAlbum(AlbumDto albumDto)
         {
 
-
+            //Kontrollerar om tillhörande artist finns
             var artist = await _context.Artists.FindAsync(albumDto.ArtistId);
             if (artist == null)
             {
                 return NotFound($"Artist with ID {albumDto.ArtistId} not found.");
             }
 
+            //Sparar värden från Dto till Album objekt
             var newEntry = new Album
             {
                 AlbumName = albumDto.AlbumName,
@@ -141,7 +141,7 @@ namespace MusicAPI.Controller
                 ArtistId = albumDto.ArtistId
             };
 
-
+            //Sparar objektet till databasen
             _context.Albums.Add(newEntry);
             await _context.SaveChangesAsync();
 

@@ -25,6 +25,7 @@ namespace MusicAPI.Controller
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Song>>> GetSongs()
         {
+            //Inkluderar artister och album som har fk i songer
             var songs = await _context.Songs
                           .Include(a => a.Artist)
                           .Include(a => a.Album)
@@ -43,6 +44,7 @@ namespace MusicAPI.Controller
         public async Task<ActionResult<Song>> GetSong(int id)
         {
 
+            //Inkluderar artister och album som har fk i songer
             var song = await _context.Songs
                 .Include(a => a.Artist)
                 .Include(a => a.Album)
@@ -72,6 +74,7 @@ namespace MusicAPI.Controller
                 return NotFound();
             }
 
+            //Flera if-satser som gör att bara om fälten är ifyllda så uppdateras värdet i databasen
             if (songPutDto.AlbumId != 0)
             {
                 // Uppdatera endast fält som skickas med i begäran
@@ -87,6 +90,7 @@ namespace MusicAPI.Controller
                 }
             }
 
+            // Uppdatera endast fält som skickas med i begäran
             if (songPutDto.ArtistId != 0)
             {
                 if (songPutDto.ArtistId != 0)
@@ -107,16 +111,19 @@ namespace MusicAPI.Controller
                 song.Title = songPutDto.Title;
             }
 
+            // Uppdatera endast fält som skickas med i begäran
             if (songPutDto.Length.HasValue)
             {
                 song.Length = songPutDto.Length.Value;
             }
 
+            // Uppdatera endast fält som skickas med i begäran
             if (!string.IsNullOrEmpty(songPutDto.Category))
             {
                 song.Category = songPutDto.Category;
             }
 
+            // Kontrollerar om fel uppstår vid sparande till databasen
             try
             {
                 await _context.SaveChangesAsync();
@@ -142,8 +149,7 @@ namespace MusicAPI.Controller
         public async Task<ActionResult<Song>> PostSong(SongDto songDto)
         {
 
-
-
+            //Kontrollerar om tillhörande artist finns
             var artist = await _context.Artists.FindAsync(songDto.ArtistId);
             if (artist == null)
             {
@@ -152,6 +158,7 @@ namespace MusicAPI.Controller
 
             var album = await _context.Albums.FindAsync(songDto.AlbumId);
 
+            //Sparar värden från Dto till Album objekt
             var newEntry = new Song
             {
                 Title = songDto.Title,
@@ -163,6 +170,7 @@ namespace MusicAPI.Controller
 
             };
 
+            //Sparar objektet till databasen
             _context.Songs.Add(newEntry);
             await _context.SaveChangesAsync();
 

@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 namespace MusicAPI.Models
 {
 
+    //Dto för Song tabellen som används för att bestämma krav post
     public class SongDto
     {
         [Required]

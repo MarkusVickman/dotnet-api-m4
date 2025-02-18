@@ -6,6 +6,7 @@ namespace MusicAPI.Models
     public class AlbumPutDto
     {
 
+        //Dto för Album tabellen som används för att bestämma krav put
         public int AlbumId { get; set; }
 
         public string? AlbumName { get; set; }

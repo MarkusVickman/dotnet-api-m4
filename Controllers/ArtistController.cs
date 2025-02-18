@@ -94,7 +94,7 @@ namespace MusicAPI.Controller
                 return NotFound();
             }
 
-
+            //Kontrollerar och förhindrar så att inte artisten kan tas bort om den används i andra tabeller
             var albums = await _context.Albums.Where(a => a.ArtistId == id).ToListAsync();
             var songs = await _context.Songs.Where(s => s.ArtistId == id).ToListAsync();
 
@@ -102,8 +102,6 @@ namespace MusicAPI.Controller
             {
                 return BadRequest("Cannot delete artist because there are related albums or songs.");
             }
-
-
 
             _context.Artists.Remove(artist);
             await _context.SaveChangesAsync();
