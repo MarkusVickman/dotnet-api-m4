@@ -8,7 +8,7 @@ namespace MusicAPI.Models
 
         public int SongId { get; set; }
 
-        public string Title { get; set; }
+        public string? Title { get; set; }
 
         public int? Length { get; set; }
 
